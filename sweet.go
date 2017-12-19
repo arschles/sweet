@@ -1,37 +1,43 @@
 package sweet
 
 import (
+	"fmt"
 	"testing"
 )
 
 // Tests is the top level object to hold a collection of tests
 type Tests interface {
-	// Add a single test to this Suite. Tests will be executed serially.
-	// If you'd like to execute tests concurrently, create a new group
-	// with NewGroup, and pass true for the concurrent parameter.
-	AddTest(t Test)
-	// Group creates a test group called name. You can choose whether to run all the tests
-	// inside this group concurrently. This function returns a new Suite object,
-	// so you can create large trees of tests if you want.
-	//
-	// Groups will be executed serially in the top level
-	Group(name string, concurrent bool) Tests
-	// Run all the tests inside this Suite
-	Run()
-	// String returns the name of these tests. Since you can arrange tests as a tree,
+	// The String() method that Tests implements (because it conforms to this interface)
+	// returns the name of these tests. Since you can arrange tests as a tree,
 	// test names are fully-qualified. If you run this:
 	//
 	//	myGroupName := sweet.New("mytests", t).Group("myothertests", false).Name()
 	//
 	// then myGroupName will be "mytests.myothertests"
+	fmt.Stringer
+	// Add a single test to this collection. Tests will be executed serially.
+	// If you'd like to execute tests concurrently, create a new group
+	// with NewGroup, and pass true for the concurrent parameter.
+	AddTest(t Test)
+	// Group creates a test group called name. You can choose whether to run all the tests
+	// inside this group concurrently. This function returns a new Tests object,
+	// so you can create large trees of tests if you want.
 	//
-	// This function makes Tests conform to the fmt.Stringer interface
-	String() string
+	// Groups will be executed serially in the top level
+	Group(name string, concurrent bool) Tests
+	// Run, as you probably guessed, runs all the tests inside this collection!
+	Run()
 }
 
-// New creates a new test suite
+// New creates a new test collection
 func New(name string, t *testing.T) Tests {
-	return &tests{path: newNameChain(name), t: t, concurrent: false}
+	return &tests{
+		path:          newNameChain(name),
+		t:             t,
+		concurrent:    false,
+		subGroups:     nil,
+		topLevelTests: nil,
+	}
 }
 
 type tests struct {
