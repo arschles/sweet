@@ -23,7 +23,7 @@ type Value interface {
 	MatchesRegex(regex string, fmtString string, vals ...interface{})
 }
 
-func newValue(t *testing.T, name string, val interface{}) Value {
+func newValue(t *testing.T, path *nameChain, val interface{}) Value {
 	// TODO: implement this!
 	return nil
 }

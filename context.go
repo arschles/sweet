@@ -20,14 +20,14 @@ type Context interface {
 }
 
 type context struct {
-	t         *testing.T
-	nameChain string
+	t    *testing.T
+	path *nameChain
 }
 
-func newContext(t *testing.T, nameChain string) &context {
+func newContext(t *testing.T, path *nameChain) *context {
 	return &context{
-		t: t,
-		nameChain: nameChain,
+		t:    t,
+		path: path,
 	}
 }
 
@@ -36,9 +36,9 @@ func (c *context) T() *testing.T {
 }
 
 func (c *context) Value(val interface{}) Value {
-	return newValue(c.t, c.nameChain, val)
+	return newValue(c.t, c.path, val)
 }
 
 func (c *context) Name() string {
-	return c.nameChain
+	return c.path.String()
 }

@@ -18,22 +18,24 @@ type Tests interface {
 	Group(name string, concurrent bool) Tests
 	// Run all the tests inside this Suite
 	Run()
-	// Name returns the name of these tests. Since you can arrange tests as a tree,
+	// String returns the name of these tests. Since you can arrange tests as a tree,
 	// test names are fully-qualified. If you run this:
 	//
 	//	myGroupName := sweet.New("mytests", t).Group("myothertests", false).Name()
 	//
 	// then myGroupName will be "mytests.myothertests"
-	Name() string
+	//
+	// This function makes Tests conform to the fmt.Stringer interface
+	String() string
 }
 
 // New creates a new test suite
 func New(name string, t *testing.T) Tests {
-	return &tests{nameChain: name, t: t, concurrent: false}
+	return &tests{path: newNameChain(name), t: t, concurrent: false}
 }
 
 type tests struct {
-	nameChain     string
+	path          *nameChain
 	t             *testing.T
 	concurrent    bool
 	topLevelTests []Test
@@ -42,7 +44,7 @@ type tests struct {
 
 func (t *tests) Group(name string, concurrent bool) Tests {
 	newGroup := &tests{
-		nameChain:     addToNameChain(t.nameChain, name),
+		path:          t.path.append(name),
 		t:             t.t,
 		concurrent:    concurrent,
 		topLevelTests: nil,
@@ -56,14 +58,14 @@ func (t *tests) AddTest(tst Test) {
 	t.topLevelTests = append(t.topLevelTests, tst)
 }
 
-func (t *tests) Name() string {
-	return t.nameChain
+func (t *tests) String() string {
+	return t.path.String()
 }
 
 func (t *tests) Run() {
 	// first run all individual tests serially
 	for _, test := range t.topLevelTests {
-		ctx := newContext(i, t.nameChain)
+		ctx := newContext(t.t, t.path)
 		test(ctx)
 	}
 	// then run groups serially
