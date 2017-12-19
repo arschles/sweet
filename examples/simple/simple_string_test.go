@@ -8,6 +8,6 @@ import (
 
 func TestSimpleStrings(t *testing.T) {
 	ste := sweet.New("simple tests", t)
-	ste.AddTest(TestASimpleString)
+	ste.AddTest(SimpleStringTest)
 	ste.Run()
 }
